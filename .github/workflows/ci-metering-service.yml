@@ -1,0 +1,23 @@
+name: CI - metering-service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/metering-service/**'
+      - 'deployment/services/metering-service/**'
+      - '.github/workflows/ci-metering-service.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/metering-service/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ metering-service CI triggered"
+          echo "Commit: ${{ github.sha }}"

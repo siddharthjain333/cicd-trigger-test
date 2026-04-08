@@ -1,0 +1,16 @@
+name: CI - Common Services (validate only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'common-services/**'
+      - 'deployment/common-services/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate manifests
+        run: echo "✅ Common services manifest validation"

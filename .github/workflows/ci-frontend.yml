@@ -1,0 +1,23 @@
+name: CI - frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/frontend/**'
+      - 'deployment/services/frontend/**'
+      - '.github/workflows/ci-frontend.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/frontend/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ frontend CI triggered"
+          echo "Commit: ${{ github.sha }}"

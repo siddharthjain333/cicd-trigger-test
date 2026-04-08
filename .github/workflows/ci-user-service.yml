@@ -1,0 +1,23 @@
+name: CI - user-service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/user-service/**'
+      - 'deployment/services/user-service/**'
+      - '.github/workflows/ci-user-service.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/user-service/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ user-service CI triggered"
+          echo "Commit: ${{ github.sha }}"

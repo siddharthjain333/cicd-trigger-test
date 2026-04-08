@@ -1,0 +1,23 @@
+name: CI - Kurious-engine
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/Kurious-engine/**'
+      - 'deployment/services/Kurious-engine/**'
+      - '.github/workflows/ci-kurious-engine.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/Kurious-engine/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ Kurious-engine CI triggered"
+          echo "Commit: ${{ github.sha }}"
