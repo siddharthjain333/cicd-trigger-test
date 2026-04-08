@@ -1,0 +1,22 @@
+name: CI - Eval Framework
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/eval-framework/**'
+      - '.github/workflows/ci-eval-framework.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/eval-framework/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ Eval Framework CI triggered"
+          echo "Commit: ${{ github.sha }}"

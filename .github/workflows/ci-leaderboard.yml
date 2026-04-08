@@ -1,0 +1,22 @@
+name: CI - Leaderboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/leaderboard/**'
+      - '.github/workflows/ci-leaderboard.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/leaderboard/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ Leaderboard CI triggered"
+          echo "Commit: ${{ github.sha }}"

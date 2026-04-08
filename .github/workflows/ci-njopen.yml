@@ -1,0 +1,22 @@
+name: CI - NJ Open Data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'solutions/njopen/**'
+      - '.github/workflows/ci-njopen.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'solutions/njopen/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ NJ Open Data CI triggered"
+          echo "Commit: ${{ github.sha }}"

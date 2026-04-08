@@ -1,0 +1,22 @@
+name: CI - Legal Videos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'solutions/legal-videos/**'
+      - '.github/workflows/ci-legal-videos.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'solutions/legal-videos/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm trigger
+        run: |
+          echo "✅ Legal Videos CI triggered"
+          echo "Commit: ${{ github.sha }}"
