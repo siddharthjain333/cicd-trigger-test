@@ -2,14 +2,42 @@ name: CI - Docs
 
 on:
   push:
-    branches: [main]
+    branches: [dev, main]
     paths:
       - 'docs/**'
+      - '.github/workflows/ci-docs.yml'
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
 
 jobs:
+  # ── Build & validate docs on every PR ─────────────────────────────────────
   build:
+    name: Build docs
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install MkDocs
+        run: pip install mkdocs mkdocs-material
+
       - name: Build docs
-        run: echo "✅ Docs build triggered"
+        run: mkdocs build --strict
+        working-directory: docs
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: docs-site
+          path: docs/site/
+          retention-days: 7

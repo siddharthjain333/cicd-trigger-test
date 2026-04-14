@@ -1,16 +1,113 @@
 name: CI - Common Services (validate only)
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches: [dev, main]
     paths:
       - 'common-services/**'
       - 'deployment/common-services/**'
+      - '.github/workflows/ci-common-services.yml'
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'common-services/**'
+      - 'deployment/common-services/**'
+  workflow_dispatch:
 
 jobs:
+  # ── Validate manifests on every PR ────────────────────────────────────────
   validate:
+    name: Validate Kubernetes manifests
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Validate manifests
-        run: echo "✅ Common services manifest validation"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar -xz -C /usr/local/bin kubeconform
+          kubeconform --version
+
+      - name: Validate common-services manifests
+        run: |
+          find common-services deployment/common-services -name "*.yaml" -o -name "*.yml" \
+            | xargs -I{} kubeconform -strict -summary {}
+
+  # ── Apply to dev on push to dev ───────────────────────────────────────────
+  apply-dev:
+    name: Apply to Dev cluster
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Install kubelogin
+        run: az aks install-cli
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group kurious-rg-dev \
+            --name aks-kurious-dev \
+            --overwrite-existing
+          kubelogin convert-kubeconfig -l azurecli
+
+      - name: Apply common-services manifests (dev)
+        run: |
+          if [ -d "deployment/common-services/dev" ]; then
+            kubectl apply -f deployment/common-services/dev/
+          else
+            kubectl apply -f common-services/
+          fi
+
+      - name: Summary
+        run: echo "Common services applied to aks-kurious-dev"
+
+  # ── Apply to prod on push to main ─────────────────────────────────────────
+  apply-prod:
+    name: Apply to Prod cluster
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Install kubelogin
+        run: az aks install-cli
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group kurious-rg-dev \
+            --name aks-kurious-dev \
+            --overwrite-existing
+          kubelogin convert-kubeconfig -l azurecli
+
+      - name: Apply common-services manifests (prod)
+        run: |
+          if [ -d "deployment/common-services/prod" ]; then
+            kubectl apply -f deployment/common-services/prod/
+          else
+            kubectl apply -f common-services/
+          fi
+
+      - name: Summary
+        run: echo "Common services applied to aks-kurious-dev (prod namespace)"
